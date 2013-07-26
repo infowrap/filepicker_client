@@ -25,19 +25,19 @@ fp_client = FilepickerClient.new FPAPIKEY, FPAPISECRET
 
 * sign - Generate signatures and policies for various Filepicker operations using your key and secret
 * store - Store a file at the specified path through Filepicker
-* info - Get size and MIME type information about a file
-* get - Get a file's content
-* update - Overwrite an existing file with a new one
-* destroy - Delete a file from Filepicker
+* stat - Get size and MIME type information about a file
+* read - Get a file's content
+* write - Overwrite an existing file with a new one
+* remove - Delete a file from Filepicker
 
 ## FilepickerClientFile
 
 The client's 'store' method will produce file objects. These are linked to the client object and provide a simple means of making further calls on that file.
 
-* info
-* get
-* update
-* destroy
+* stat
+* read
+* write
+* remove
 
 # Testing
 

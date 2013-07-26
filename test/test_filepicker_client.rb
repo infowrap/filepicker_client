@@ -8,9 +8,9 @@ class TestFilepickerClient < Test::Unit::TestCase
 		@api_secret = ENV['FPAPISECRET']
 	end
 
-	def test_fp_uri
+	def test_file_uri
 		client = FilepickerClient.new 'fake-key', 'fake-secret'
-		uri = client.fp_uri('fake-handle')
+		uri = client.file_uri('fake-handle')
 		assert_equal "https://www.filepicker.io/api/file/fake-handle", uri.to_s
 	end
 
@@ -26,49 +26,55 @@ class TestFilepickerClient < Test::Unit::TestCase
 		store_file.write content
 		store_file.rewind
 
-		update_content = "updated content\n" * 10
+		write_content = "write content\n" * 10
 
-		update_file = Tempfile.new('test-update.txt')
-		update_file.write update_content
-		update_file.rewind
+		write_file = Tempfile.new('test-write.txt')
+		write_file.write write_content
+		write_file.rewind
 
 		begin
 			# store
 			file = client.store(store_file, 'test')
 
-			# info
-			info = file.info
-			assert_equal content.length, info[:size]
-			assert_equal 'text/plain; charset=utf-8', info[:mime_type]
+			# stat
+			stats = file.stat
+			assert_equal content.length, stats[:size]
+			assert_equal 'text/plain; charset=utf-8', stats[:mime_type]
 
-			# get
-			downloaded_content = file.get
+			# read
+			downloaded_content = file.read
 			assert_equal content, downloaded_content
 
-			# update
-			file.update update_file
+			# store_url
+			second_file = client.store_url file.file_read_uri, 'test'
+			assert_not_equal second_file.handle, file.handle
+			assert_equal second_file.read, content
 
-			downloaded_content = file.get
-			assert_equal update_content, downloaded_content
+			# write
+			file.write write_file
 
-			# destroy
-			assert file.destroy
+			downloaded_content = file.read
+			assert_equal write_content, downloaded_content
+
+			# remove
+			assert file.remove
+			assert second_file.remove
 
 			error_fired = false
 			begin
-				file.get
+				file.read
 			rescue Exception => e
 				error_fired = true
 			end
-			assert error_fired, "no error fired when getting a deleted file"
+			assert error_fired, "no error fired when reading a deleted file"
 		rescue Exception => e
 			raise e	# reraise to have error reported
 		ensure
 			store_file.close
 			store_file.unlink
 
-			update_file.close
-			update_file.unlink
+			write_file.close
+			write_file.unlink
 		end
 	end
 end

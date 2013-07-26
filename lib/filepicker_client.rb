@@ -6,6 +6,8 @@ class FilepickerClient
 	FP_FILE_PATH = "https://www.filepicker.io/api/file/"
 	FP_API_PATH = "https://www.filepicker.io/api/store/S3"
 
+	DEFAULT_POLICY_EXPIRY = 5 * 60	# 5 minutes (short for security, but allows for some wiggle room)
+
 	def initialize(api_key, api_secret, filepicker_cert=nil)
 		@api_key = api_key
 		@api_secret = api_secret
@@ -14,7 +16,7 @@ class FilepickerClient
 
 	def sign(options={})
 		options[:expiration_start] ||= Time.now
-		options[:expiry] ||= (5 * 60)  # Default to 5 minutes expiration for policies
+		options[:expiry] ||= DEFAULT_POLICY_EXPIRY
 
 		policy = {
 			'call' => options[:call]
@@ -51,18 +53,18 @@ class FilepickerClient
 		}
 	end
 
-	def fp_uri(fp_handle)
-		URI.parse(FP_FILE_PATH + fp_handle)
+	def file_uri(handle)
+		URI.parse(FP_FILE_PATH + handle)
 	end
 
-	def fp_read_uri(fp_handle, expiry=5*60)
+	def file_read_uri(handle, expiry=DEFAULT_POLICY_EXPIRY)
 		signage = sign(
 			expiry: expiry,
-			handle: fp_handle,
+			handle: handle,
 			call: ['read', 'convert']
 		)
 
-		uri = fp_uri(fp_handle)
+		uri = file_uri(handle)
 		uri.query = URI.encode_www_form(
 			signature: signage[:signature],
 			policy: signage[:encoded_policy]
@@ -96,24 +98,50 @@ class FilepickerClient
 		end
 	end
 
-	def info(fp_handle)
-		uri = fp_read_uri(fp_handle)
+	def store_url(file_url, path=nil)
+		signage = sign(path: path, call: :store)
+
+		uri = URI.parse(FP_API_PATH)
+		uri.query = URI.encode_www_form(
+			key: @api_key,
+			signature: signage[:signature],
+			policy: signage[:encoded_policy],
+			path: signage[:policy]['path']
+		)
+
+		resource = get_fp_resource uri
+
+		response = resource.post url: file_url.to_s
+
+		if response.code == 200
+			response_data = JSON.parse response.body
+			file = FilepickerClientFile.new response_data, self
+
+			return file
+		else
+			raise FilepickerClientError, "failed to store (code: #{response.code})"
+		end
+	end
+
+	def stat(handle)
+		uri = file_read_uri(handle)
 		resource = get_fp_resource uri
 
 		response = resource.head
 
 		if response.code == 200
 			return {
+				name: response.headers[:x_file_name].to_s,
 				size: response.headers[:content_length].to_i,
 				mime_type: response.headers[:content_type].to_s
 			}
 		else
-			raise FilepickerClientError, "failed to get file info (code: #{response.code})"
+			raise FilepickerClientError, "failed to get file stats (code: #{response.code})"
 		end
 	end
 
-	def get(fp_handle)
-		uri = fp_read_uri(fp_handle)
+	def read(handle)
+		uri = file_read_uri(handle)
 		resource = get_fp_resource uri
 
 		response = resource.get
@@ -121,14 +149,14 @@ class FilepickerClient
 		if response.code == 200
 			return response
 		else
-			raise FilepickerClientError, "failed to get file content (code: #{response.code})"
+			raise FilepickerClientError, "failed to read file content (code: #{response.code})"
 		end
 	end
 
-	def update(fp_handle, file)
-		signage = sign(handle: fp_handle, call: :write)
+	def write(handle, file)
+		signage = sign(handle: handle, call: :write)
 
-		uri = fp_uri(fp_handle)
+		uri = file_uri(handle)
 		uri.query = URI.encode_www_form(
 			key: @api_key,
 			signature: signage[:signature],
@@ -142,14 +170,14 @@ class FilepickerClient
 		if response.code == 200
 			return true
 		else
-			raise FilepickerClientError, "failed to update (code: #{response.code})"
+			raise FilepickerClientError, "failed to write (code: #{response.code})"
 		end
 	end
 
-	def destroy(fp_handle)
-		signage = sign(handle: fp_handle, call: :remove)
+	def remove(handle)
+		signage = sign(handle: handle, call: :remove)
 
-		uri = fp_uri(fp_handle)
+		uri = file_uri(handle)
 		uri.query = URI.encode_www_form(
 			key: @api_key,
 			signature: signage[:signature],
@@ -179,53 +207,53 @@ class FilepickerClient
 end
 
 class FilepickerClientFile
-	attr_accessor :mime_type, :size, :fp_handle, :store_key, :client
+	attr_accessor :mime_type, :size, :handle, :store_key, :client
 
-	def initialize(fp_blob={}, client=nil)
-		@mime_type = fp_blob['type']
-		@size = fp_blob['size']
-		@fp_handle = URI.parse(fp_blob['url']).path.split('/').last.strip unless fp_blob['url'].nil?
-		@store_key = fp_blob['key']
+	def initialize(blob={}, client=nil)
+		@mime_type = blob['type']
+		@size = blob['size']
+		@handle = URI.parse(blob['url']).path.split('/').last.strip unless blob['url'].nil?
+		@store_key = blob['key']
 
 		@client = client
 	end
 
-	def fp_uri
-		URI.parse(FP_FILE_PATH + @fp_handle)
+	def file_uri
+		URI.parse(FP_FILE_PATH + @handle)
 	end
 
-	def fp_read_uri(expiry=5*60)
+	def file_read_uri(expiry=FilepickerClient::DEFAULT_POLICY_EXPIRY)
 		client_required
 
-		@client.fp_read_uri(@fp_handle, expiry)
+		@client.file_read_uri(@handle, expiry)
 	end
 
-	def info
+	def stat
 		client_required
 
-		updated_info = @client.info @fp_handle
+		updated_info = @client.stat @handle
 		@mime_type = updated_info[:mime_type]
 		@size = updated_info[:size]
 
 		return updated_info
 	end
 
-	def get
+	def read
 		client_required
 
-		@client.get @fp_handle
+		@client.read @handle
 	end
 
-	def update(file)
+	def write(file)
 		client_required
 
-		@client.update @fp_handle, file
+		@client.write @handle, file
 	end
 
-	def destroy
+	def remove
 		client_required
 
-		@client.destroy @fp_handle
+		@client.remove @handle
 	end
 
 	private
