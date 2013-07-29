@@ -2,18 +2,37 @@ require 'rest-client'
 require 'json'
 require 'base64'
 
+# Client interface for Filepicker's REST API
 class FilepickerClient
-	FP_FILE_PATH = "https://www.filepicker.io/api/file/"
-	FP_API_PATH = "https://www.filepicker.io/api/store/S3"
+	FP_FILE_PATH = "https://www.filepicker.io/api/file/"	# Path that Filepicker file handles are located under
+	FP_API_PATH = "https://www.filepicker.io/api/store/S3"	# Path to access the Filepicker API
 
 	DEFAULT_POLICY_EXPIRY = 5 * 60	# 5 minutes (short for security, but allows for some wiggle room)
 
+	# Creates a client that will use the given Filepicker key and secret for requests and signing operations
+	# @param api_key [String] Filepicker API key
+	# @param api_secret [String] Filepicker API secret
+	# @param filepicker_cert [OpenSSL::X509::Certificate] Optional certificate for verifying HTTPS connections to Filepicker
 	def initialize(api_key, api_secret, filepicker_cert=nil)
 		@api_key = api_key
 		@api_secret = api_secret
 		@filepicker_cert = filepicker_cert
 	end
 
+	# Create policies and signatures for Filepicker operations.
+	#
+	# Allowed Options:
+	#
+	# * expiration_start - Time from which the expiry value should start
+	# * expiry - Seconds until the signature should expire (defaults to DEFAULT_POLICY_EXPIRY)
+	# * call - Filepicker calls to allow (String, Symbol or Array of the following: 'read', 'stat', 'convert', 'write', 'writeUrl', 'pick', 'store', 'storeUrl')
+	# * handle - Handle of the specific file to grant permissions for
+	# * path - Path in the storage that Filepicker uploads to that the operations should be restricted to
+	# * min_size - Minimum allowed upload size
+	# * max_size - Maximum allowed upload size
+	#
+	# @param options [Hash] Options for generating the desired signature
+	# @return [Hash] The policy generated with the encoded policy and signature for use in Filepicker requests
 	def sign(options={})
 		options[:expiration_start] ||= Time.now
 		options[:expiry] ||= DEFAULT_POLICY_EXPIRY
@@ -53,10 +72,17 @@ class FilepickerClient
 		}
 	end
 
+	# Get Filepicker URI for the file with the given handle.
+	# @param handle [String] Handle for the file in Filepicker
+	# @return [URI] URI for the file in Filepicker
 	def file_uri(handle)
 		URI.parse(FP_FILE_PATH + handle)
 	end
 
+	# Get Filepicker URI for the file with the given handle signed for read and convert calls.
+	# @param handle [String] Handle for the file in Filepicker
+	# @param expiry [Fixnum] Expiration for the URI's signature
+	# @return [URI] URI for the file in Filepicker signed for read and convert
 	def file_read_uri(handle, expiry=DEFAULT_POLICY_EXPIRY)
 		signage = sign(
 			expiry: expiry,
@@ -73,6 +99,10 @@ class FilepickerClient
 		return uri
 	end
 
+	# Store the given file at the given storage path through Filepicker.
+	# @param path [String] Path the file should be organized under in the destination storage
+	# @param file [File] File to upload
+	# @return [FilepickerClientFile] Object representing the uploaded file in Filepicker
 	def store(file, path=nil)
 		signage = sign(path: path, call: :store)
 
@@ -98,6 +128,10 @@ class FilepickerClient
 		end
 	end
 
+	# Store the file located at the given URL under the target storage path through Filepicker.
+	# @param path [String] Path the file should be organized under in the destination storage
+	# @param file_url [String] URL to get the file to upload from
+	# @return [FilepickerClientFile] Object representing the uploaded file in Filepicker
 	def store_url(file_url, path=nil)
 		signage = sign(path: path, call: :store)
 
@@ -123,6 +157,9 @@ class FilepickerClient
 		end
 	end
 
+	# Get basic information about a file.
+	# @param handle [String] Handle for the file in Filepicker
+	# @return [Hash] Name, size, and MIME type of the file
 	def stat(handle)
 		uri = file_read_uri(handle)
 		resource = get_fp_resource uri
@@ -140,6 +177,9 @@ class FilepickerClient
 		end
 	end
 
+	# Get the content of a file.
+	# @param handle [String] Handle for the file in Filepicker
+	# @return [String] Content of the file
 	def read(handle)
 		uri = file_read_uri(handle)
 		resource = get_fp_resource uri
@@ -153,6 +193,10 @@ class FilepickerClient
 		end
 	end
 
+	# Overwrite the file with the given handle using the provided file.
+	# @param handle [String] Handle for the file in Filepicker
+	# @param file [File] File to upload
+	# @return [True] Returns true if successful
 	def write(handle, file)
 		signage = sign(handle: handle, call: :write)
 
@@ -174,6 +218,10 @@ class FilepickerClient
 		end
 	end
 
+	# Overwrite the file with the given handle using the file at the provided URL.
+	# @param handle [String] Handle for the file in Filepicker
+	# @param file_url [String] URL to get the file to upload from
+	# @return [True] Returns true if successful
 	def write_url(handle, file_url)
 		signage = sign(handle: handle, call: :writeUrl)
 
@@ -195,6 +243,9 @@ class FilepickerClient
 		end
 	end
 
+	# Remove a file from Filepicker.
+	# @param handle [String] Handle for the file in Filepicker
+	# @return [True] Returns true if successful
 	def remove(handle)
 		signage = sign(handle: handle, call: :remove)
 
@@ -227,9 +278,13 @@ class FilepickerClient
 	end
 end
 
+# Filepicker File Container
 class FilepickerClientFile
 	attr_accessor :mime_type, :size, :handle, :store_key, :client
 
+	# Create an object linked to the client to interact with the file in Filepicker
+	# @param blob [Hash] Information about the file from Filepicker
+	# @return [FilepickerClientFile]
 	def initialize(blob={}, client=nil)
 		@mime_type = blob['type']
 		@size = blob['size']
@@ -239,16 +294,23 @@ class FilepickerClientFile
 		@client = client
 	end
 
+	# Get Filepicker URI for this file
+	# @return [URI] URI for the file in Filepicker
 	def file_uri
 		URI.parse(FP_FILE_PATH + @handle)
 	end
 
+	# Get Filepicker URI for this file signed for read and convert calls.
+	# @param expiry [Fixnum] Expiration for the URI's signature
+	# @return [URI] URI for the file in Filepicker signed for read and convert
 	def file_read_uri(expiry=FilepickerClient::DEFAULT_POLICY_EXPIRY)
 		client_required
 
 		@client.file_read_uri(@handle, expiry)
 	end
 
+	# Get basic information about this file.
+	# @return [Hash] Name, size, and MIME type of the file
 	def stat
 		client_required
 
@@ -259,24 +321,34 @@ class FilepickerClientFile
 		return updated_info
 	end
 
+	# Get the content of this file.
+	# @return [String] Content of the file
 	def read
 		client_required
 
 		@client.read @handle
 	end
 
+	# Overwrite this file using the provided file.
+	# @param file [File] File to upload
+	# @return [True] Returns true if successful
 	def write(file)
 		client_required
 
 		@client.write @handle, file
 	end
 
+	# Overwrite this file using the file at the provided URL.
+	# @param file_url [String] URL to get the file to upload from
+	# @return [True] Returns true if successful
 	def write_url(file_url)
 		client_required
 
 		@client.write_url @handle, file_url
 	end
 
+	# Remove this file from Filepicker.
+	# @return [True] Returns true if successful
 	def remove
 		client_required
 
@@ -292,5 +364,6 @@ class FilepickerClientFile
 	end
 end
 
+# Client errors
 class FilepickerClientError < StandardError
 end

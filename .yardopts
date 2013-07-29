@@ -1,0 +1,1 @@
+lib/**/*.rb --output-dir=doc --markup=markdown

@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>
+  File: README
+  
+    &mdash; Documentation by YARD 0.8.7
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css" charset="utf-8" />
+
+  <link rel="stylesheet" href="css/common.css" type="text/css" charset="utf-8" />
+
+<script type="text/javascript" charset="utf-8">
+  hasFrames = window.top.frames.main ? true : false;
+  relpath = '';
+  framesUrl = "frames.html#!" + escape(window.location.href);
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="header">
+      <div id="menu">
+  
+    <a href="_index.html">Index</a> &raquo; 
+    <span class="title">File: README</span>
+  
+
+  <div class="noframes"><span class="title">(</span><a href="." target="_top">no frames</a><span class="title">)</span></div>
+</div>
+
+      <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+      Class List
+    </a>
+  
+    <a class="full_list_link" id="method_list_link"
+        href="method_list.html">
+      Method List
+    </a>
+  
+    <a class="full_list_link" id="file_list_link"
+        href="file_list.html">
+      File List
+    </a>
+  
+</div>
+      <div class="clear"></div>
+    </div>
+
+    <iframe id="search_frame"></iframe>
+
+    <div id="content"><div id='filecontents'>
+<h1 id="label-Filepicker+Client">Filepicker Client</h1>
+
+<p>This library provides a basic interface to the REST API for <a
+href="https://www.inkfilepicker.com/">www.inkfilepicker.com/</a> (see <a
+href="https://developers.inkfilepicker.com/docs/web/#rest">REST API
+Documentation</a>).</p>
+
+<h1 id="label-Installation">Installation</h1>
+
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_gem'>gem</span> <span class='id identifier rubyid_install'>install</span> <span class='id identifier rubyid_filepicker_client'>filepicker_client</span></code></pre>
+
+<h1 id="label-Usage">Usage</h1>
+
+<p>The FilepickerClient class is used to manage calls to the REST API. You may
+create a new client object with your Filepicker API key and secret.</p>
+
+<pre class="ruby"><span class="ruby-identifier">require</span> <span class="ruby-string">&#39;filepicker_client&#39;</span>
+
+<span class="ruby-constant">FPAPIKEY</span>=<span class="ruby-constant">YOUR_API_KEY_HERE</span>
+<span class="ruby-constant">FPAPISECRET</span>=<span class="ruby-constant">YOUR_API_SECRET_HERE</span>
+
+<span class="ruby-identifier">fp_client</span> = <span class="ruby-constant">FilepickerClient</span>.<span class="ruby-identifier">new</span> <span class="ruby-constant">FPAPIKEY</span>, <span class="ruby-constant">FPAPISECRET</span>
+</pre>
+
+<h2 id="label-Client+Methods">Client Methods</h2>
+<ul><li>
+<p>sign - Generate signatures and policies for various Filepicker operations
+using your key and secret</p>
+</li><li>
+<p>store - Store a file under the specified path through Filepicker</p>
+</li><li>
+<p>store_url - Store a file accessible at a URL under the specified path
+through Filepicker</p>
+</li><li>
+<p>stat - Get size and MIME type information about a file</p>
+</li><li>
+<p>read - Get a file&#39;s content</p>
+</li><li>
+<p>write - Overwrite an existing file with a new one</p>
+</li><li>
+<p>write_url - Overwrite an existing file with a file accessible at a URL</p>
+</li><li>
+<p>remove - Delete a file from Filepicker</p>
+</li></ul>
+
+<h2 id="label-FilepickerClientFile">FilepickerClientFile</h2>
+
+<p>The client&#39;s &#39;store&#39; method will produce file objects. These
+are linked to the client object and provide a simple means of making
+further calls on that file.</p>
+<ul><li>
+<p>stat</p>
+</li><li>
+<p>read</p>
+</li><li>
+<p>write</p>
+</li><li>
+<p>write_url</p>
+</li><li>
+<p>remove</p>
+</li></ul>
+
+<h1 id="label-Testing">Testing</h1>
+
+<p>Since this library involves operations against the Filepicker service, in
+order to run the tests, valid API key and secret environment variables must
+be set. This will allow the test to connect to Filepicker using your
+credentials and work with files in your storage. Please look over the test
+code to ensure you are comfortable with it running against your Filepicker
+account.</p>
+
+<p>Currently each run of the tests will only store two files under the “test”
+path and attempt to remove them when finished.</p>
+
+<pre class="code ruby"><code class="ruby">rake test FPAPIKEY=YOUR_API_KEY_HERE FPAPISECRET=YOUR_API_SECRET_HERE</code></pre>
+</div></div>
+
+    <div id="footer">
+  Generated on Mon Jul 29 15:55:52 2013 by
+  <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.8.7 (ruby-2.0.0).
+</div>
+
+  </body>
+</html>
