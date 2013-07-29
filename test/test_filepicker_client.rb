@@ -56,6 +56,12 @@ class TestFilepickerClient < Test::Unit::TestCase
 			downloaded_content = file.read
 			assert_equal write_content, downloaded_content
 
+			# write_url
+			# - write from second_file to first
+			# - first should have write_content then content after write url
+			file.write_url second_file.file_read_uri
+			assert_equal content, file.read
+
 			# remove
 			assert file.remove
 			assert second_file.remove

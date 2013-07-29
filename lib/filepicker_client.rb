@@ -174,6 +174,27 @@ class FilepickerClient
 		end
 	end
 
+	def write_url(handle, file_url)
+		signage = sign(handle: handle, call: :writeUrl)
+
+		uri = file_uri(handle)
+		uri.query = URI.encode_www_form(
+			key: @api_key,
+			signature: signage[:signature],
+			policy: signage[:encoded_policy]
+		)
+
+		resource = get_fp_resource uri
+
+		response = resource.put url: file_url.to_s
+
+		if response.code == 200
+			return true
+		else
+			raise FilepickerClientError, "failed to write (code: #{response.code})"
+		end
+	end
+
 	def remove(handle)
 		signage = sign(handle: handle, call: :remove)
 
@@ -248,6 +269,12 @@ class FilepickerClientFile
 		client_required
 
 		@client.write @handle, file
+	end
+
+	def write_url(file_url)
+		client_required
+
+		@client.write_url @handle, file_url
 	end
 
 	def remove
