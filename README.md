@@ -4,8 +4,10 @@ This library provides a basic interface to the REST API for [https://www.inkfile
 
 # Installation
 
+In Gemfile:
+
 ```
-gem install filepicker_client
+gem 'filepicker_client', :git => 'git://github.com/infowrap/filepicker_client.git'
 ```
 
 # Usage

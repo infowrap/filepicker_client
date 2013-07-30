@@ -82,7 +82,7 @@ class FilepickerClient
 	# Get Filepicker URI for the file with the given handle signed for read and convert calls.
 	# @param handle [String] Handle for the file in Filepicker
 	# @param expiry [Fixnum] Expiration for the URI's signature
-	# @return [URI] URI for the file in Filepicker signed for read and convert
+	# @return [Hash] Hash with URI signed for read and convert calls (:uri) and the expiry for the URI (:expiry)
 	def file_read_uri(handle, expiry=DEFAULT_POLICY_EXPIRY)
 		signage = sign(
 			expiry: expiry,
@@ -96,7 +96,10 @@ class FilepickerClient
 			policy: signage[:encoded_policy]
 		)
 
-		return uri
+		return {
+			uri: uri,
+			expiry: signage[:policy]['expiry'].to_i
+		}
 	end
 
 	# Store the given file at the given storage path through Filepicker.
@@ -161,7 +164,7 @@ class FilepickerClient
 	# @param handle [String] Handle for the file in Filepicker
 	# @return [Hash] Name, size, and MIME type of the file
 	def stat(handle)
-		uri = file_read_uri(handle)
+		uri = file_read_uri(handle)[:uri]
 		resource = get_fp_resource uri
 
 		response = resource.head
@@ -181,7 +184,7 @@ class FilepickerClient
 	# @param handle [String] Handle for the file in Filepicker
 	# @return [String] Content of the file
 	def read(handle)
-		uri = file_read_uri(handle)
+		uri = file_read_uri(handle)[:uri]
 		resource = get_fp_resource uri
 
 		response = resource.get
