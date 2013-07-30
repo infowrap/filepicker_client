@@ -7,7 +7,7 @@ This library provides a basic interface to the REST API for [https://www.inkfile
 In Gemfile:
 
 ```
-gem 'filepicker_client', :git => 'git://github.com/infowrap/filepicker_client.git'
+gem 'filepicker_client', git: 'git://github.com/infowrap/filepicker_client.git'
 ```
 
 # Usage
