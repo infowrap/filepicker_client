@@ -61,7 +61,7 @@ class TestFilepickerClient < Test::Unit::TestCase
       assert_equal content, downloaded_content
 
       # store_url
-      second_file = client.store_url file.file_read_uri[:uri], 'test'
+      second_file = client.store_url file.file_read_uri_and_expiry[:uri], 'test'
       assert_not_equal second_file.handle, file.handle
       assert_equal second_file.read, content
 
@@ -74,7 +74,7 @@ class TestFilepickerClient < Test::Unit::TestCase
       # write_url
       # - write from second_file to first
       # - first should have write_content then content after write url
-      file.write_url second_file.file_read_uri[:uri]
+      file.write_url second_file.file_read_uri_and_expiry[:uri]
       assert_equal content, file.read
 
       # remove

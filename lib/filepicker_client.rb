@@ -80,10 +80,11 @@ class FilepickerClient
   end
 
   # Get Filepicker URI for the file with the given handle signed for read and convert calls.
+  # The expiry value returned with the URI indicates the time the URI will expire at.
   # @param handle [String] Handle for the file in Filepicker
-  # @param expiry [Fixnum] Expiration for the URI's signature
+  # @param expiry [Fixnum] Number of seconds until the URI should expire
   # @return [Hash] Hash with URI signed for read and convert calls (:uri) and the expiry for the URI (:expiry)
-  def file_read_uri(handle, expiry=DEFAULT_POLICY_EXPIRY)
+  def file_read_uri_and_expiry(handle, expiry=DEFAULT_POLICY_EXPIRY)
     signage = sign(
       expiry: expiry,
       handle: handle,
@@ -164,7 +165,7 @@ class FilepickerClient
   # @param handle [String] Handle for the file in Filepicker
   # @return [Hash] Name, size, and MIME type of the file
   def stat(handle)
-    uri = file_read_uri(handle)[:uri]
+    uri = file_read_uri_and_expiry(handle)[:uri]
     resource = get_fp_resource uri
 
     response = resource.head
@@ -184,7 +185,7 @@ class FilepickerClient
   # @param handle [String] Handle for the file in Filepicker
   # @return [String] Content of the file
   def read(handle)
-    uri = file_read_uri(handle)[:uri]
+    uri = file_read_uri_and_expiry(handle)[:uri]
     resource = get_fp_resource uri
 
     response = resource.get
@@ -287,6 +288,7 @@ class FilepickerClientFile
 
   # Create an object linked to the client to interact with the file in Filepicker
   # @param blob [Hash] Information about the file from Filepicker
+  # @param client [FilepickerClient] Client through which actions on this file should be taken
   # @return [FilepickerClientFile]
   def initialize(blob, client)
     @mime_type = blob['type']
@@ -310,8 +312,8 @@ class FilepickerClientFile
   # Get Filepicker URI for this file signed for read and convert calls.
   # @param expiry [Fixnum] Expiration for the URI's signature
   # @return [URI] URI for the file in Filepicker signed for read and convert
-  def file_read_uri(expiry=FilepickerClient::DEFAULT_POLICY_EXPIRY)
-    @client.file_read_uri(@handle, expiry)
+  def file_read_uri_and_expiry(expiry=FilepickerClient::DEFAULT_POLICY_EXPIRY)
+    @client.file_read_uri_and_expiry(@handle, expiry)
   end
 
   # Get basic information about this file.
