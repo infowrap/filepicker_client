@@ -36,6 +36,11 @@ class TestFilepickerClient < Test::Unit::TestCase
       # store
       file = client.store(store_file, 'test')
 
+
+      #file_uri
+      file_uri = file.file_uri
+      assert_equal "https://www.filepicker.io/api/file/#{file.handle}", file_uri.to_s
+
       # stat
       stats = file.stat
       assert_equal content.length, stats[:size]

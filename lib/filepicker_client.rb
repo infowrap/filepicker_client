@@ -300,7 +300,7 @@ class FilepickerClientFile
   # Get Filepicker URI for this file
   # @return [URI] URI for the file in Filepicker
   def file_uri
-    URI.parse(FP_FILE_PATH + @handle)
+    @client.file_uri(@handle)
   end
 
   # Get Filepicker URI for this file signed for read and convert calls.
