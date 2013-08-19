@@ -14,6 +14,17 @@ class TestFilepickerClient < Test::Unit::TestCase
     assert_equal "https://www.filepicker.io/api/file/fake-handle", uri.to_s
   end
 
+  def test_client_file_client_required
+    begin
+      client_file = FilepickerClientFile.new({}, nil)
+    rescue FilepickerClientError => e
+      assert_equal "FilepickerClientFile client required", e.message
+      error_fired = true
+    end
+
+    assert error_fired, "FilepickerClientFile did not require a client as it should"
+  end
+
   def test_file
     assert @api_key, "Must set FPAPIKEY for this test"
     assert @api_secret, "Must set FPAPISECRET for this test"
@@ -35,7 +46,6 @@ class TestFilepickerClient < Test::Unit::TestCase
     begin
       # store
       file = client.store(store_file, 'test')
-
 
       #file_uri
       file_uri = file.file_uri

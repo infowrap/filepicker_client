@@ -288,13 +288,17 @@ class FilepickerClientFile
   # Create an object linked to the client to interact with the file in Filepicker
   # @param blob [Hash] Information about the file from Filepicker
   # @return [FilepickerClientFile]
-  def initialize(blob={}, client=nil)
+  def initialize(blob, client)
     @mime_type = blob['type']
     @size = blob['size']
     @handle = URI.parse(blob['url']).path.split('/').last.strip unless blob['url'].nil?
     @store_key = blob['key']
 
     @client = client
+
+    unless @client
+      raise FilepickerClientError, "FilepickerClientFile client required"
+    end
   end
 
   # Get Filepicker URI for this file
@@ -307,16 +311,12 @@ class FilepickerClientFile
   # @param expiry [Fixnum] Expiration for the URI's signature
   # @return [URI] URI for the file in Filepicker signed for read and convert
   def file_read_uri(expiry=FilepickerClient::DEFAULT_POLICY_EXPIRY)
-    client_required
-
     @client.file_read_uri(@handle, expiry)
   end
 
   # Get basic information about this file.
   # @return [Hash] Name, size, and MIME type of the file
   def stat
-    client_required
-
     updated_info = @client.stat @handle
     @mime_type = updated_info[:mime_type]
     @size = updated_info[:size]
@@ -327,8 +327,6 @@ class FilepickerClientFile
   # Get the content of this file.
   # @return [String] Content of the file
   def read
-    client_required
-
     @client.read @handle
   end
 
@@ -336,8 +334,6 @@ class FilepickerClientFile
   # @param file [File] File to upload
   # @return [True] Returns true if successful
   def write(file)
-    client_required
-
     @client.write @handle, file
   end
 
@@ -345,25 +341,13 @@ class FilepickerClientFile
   # @param file_url [String] URL to get the file to upload from
   # @return [True] Returns true if successful
   def write_url(file_url)
-    client_required
-
     @client.write_url @handle, file_url
   end
 
   # Remove this file from Filepicker.
   # @return [True] Returns true if successful
   def remove
-    client_required
-
     @client.remove @handle
-  end
-
-  private
-
-  def client_required
-    unless @client
-      raise FilepickerClientError, "FilepickerClientFile client must be set to use this operation"
-    end
   end
 end
 
