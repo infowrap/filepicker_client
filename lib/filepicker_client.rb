@@ -284,7 +284,7 @@ end
 
 # Filepicker File Container
 class FilepickerClientFile
-  attr_accessor :mime_type, :size, :handle, :store_key, :client
+  attr_accessor :mime_type, :size, :handle, :store_key, :filename, :client
 
   # Create an object linked to the client to interact with the file in Filepicker
   # @param blob [Hash] Information about the file from Filepicker
@@ -295,6 +295,7 @@ class FilepickerClientFile
     @size = blob['size']
     @handle = URI.parse(blob['url']).path.split('/').last.strip unless blob['url'].nil?
     @store_key = blob['key']
+    @filename = blob['filename']
 
     @client = client
 

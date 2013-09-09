@@ -47,6 +47,9 @@ class TestFilepickerClient < Test::Unit::TestCase
       # store
       file = client.store(store_file, 'test')
 
+      # file attributes
+      assert_match /^test\.txt/, file.filename
+
       #file_uri
       file_uri = file.file_uri
       assert_equal "https://www.filepicker.io/api/file/#{file.handle}", file_uri.to_s
