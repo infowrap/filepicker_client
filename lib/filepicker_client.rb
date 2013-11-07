@@ -161,6 +161,52 @@ class FilepickerClient
     end
   end
 
+  # Store a converted version of a file under the target storage path.
+  #
+  # For all available options, see Filepicker's [Image Conversion API](https://developers.inkfilepicker.com/docs/web/#inkblob-images).
+  #
+  # @param handle [String] Handle for the original file in Filepicker
+  # @param path [String] Path the file should be organized under in the destination storage
+  # @param options [Hash]
+  # @return [FilepickerClientFile] Object representing the uploaded file in Filepicker
+  def convert_and_store(handle, path=nil, options = {})
+    # Build a convert url for the file
+    uri = file_uri(handle)
+    uri.path += "/convert"
+
+    # Sign to allow store of a new file under the target path.
+    # The handle of the file being read is not required.
+    signage = sign(
+      expiry: DEFAULT_POLICY_EXPIRY,
+      path: path,
+      call: ['convert', 'store']
+    )
+
+    # Add key, signature, and policy into the query string along
+    # with the convert options.
+    options.merge!(
+      key: @api_key,
+      signature: signage[:signature],
+      policy: signage[:encoded_policy],
+      storeLocation: 'S3',
+      storePath: signage[:policy]['path']
+    )
+    uri.query = URI.encode_www_form(options)
+
+    resource = get_fp_resource uri
+
+    response = resource.post({})  # all data in query string already, empty hash is just to allow this call to be made
+
+    if response.code == 200
+      response_data = JSON.parse response.body
+      file = FilepickerClientFile.new response_data, self
+
+      return file
+    else
+      raise FilepickerClientError, "failed to store (code: #{response.code})"
+    end
+  end
+
   # Get basic information about a file.
   # @param handle [String] Handle for the file in Filepicker
   # @return [Hash] Name, size, and MIME type of the file
