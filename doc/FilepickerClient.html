@@ -346,7 +346,7 @@ requests and signing operations.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#stat-instance_method" title="#stat (instance method)">- (Hash) <strong>stat</strong>(handle) </a>
+      <a href="#stat-instance_method" title="#stat (instance method)">- (Hash) <strong>stat</strong>(handle, options = {}) </a>
     
 
     
@@ -552,14 +552,14 @@ requests and signing operations</p>
       <pre class="lines">
 
 
-16
 17
 18
 19
-20</pre>
+20
+21</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/filepicker_client.rb', line 16</span>
+      <pre class="code"><span class="info file"># File 'lib/filepicker_client.rb', line 17</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_api_key'>api_key</span><span class='comma'>,</span> <span class='id identifier rubyid_api_secret'>api_secret</span><span class='comma'>,</span> <span class='id identifier rubyid_filepicker_cert'>filepicker_cert</span><span class='op'>=</span><span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='ivar'>@api_key</span> <span class='op'>=</span> <span class='id identifier rubyid_api_key'>api_key</span>
@@ -677,8 +677,6 @@ Conversion API</a>.</p>
       <pre class="lines">
 
 
-172
-173
 174
 175
 176
@@ -713,12 +711,18 @@ Conversion API</a>.</p>
 205
 206
 207
-208</pre>
+208
+209
+210
+211
+212</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/filepicker_client.rb', line 172</span>
+      <pre class="code"><span class="info file"># File 'lib/filepicker_client.rb', line 174</span>
 
-<span class='kw'>def</span> <span class='id identifier rubyid_convert_and_store'>convert_and_store</span><span class='lparen'>(</span><span class='id identifier rubyid_handle'>handle</span><span class='comma'>,</span> <span class='id identifier rubyid_path'>path</span><span class='op'>=</span><span class='kw'>nil</span><span class='comma'>,</span> <span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span><span class='rparen'>)</span>
+<span class='kw'>def</span> <span class='id identifier rubyid_convert_and_store'>convert_and_store</span><span class='lparen'>(</span><span class='id identifier rubyid_handle'>handle</span><span class='comma'>,</span> <span class='id identifier rubyid_path'>path</span><span class='op'>=</span><span class='kw'>nil</span><span class='comma'>,</span> <span class='id identifier rubyid_options'>options</span><span class='op'>=</span><span class='lbrace'>{</span><span class='rbrace'>}</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='id identifier rubyid_convert_hash'>convert_hash</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
+
   <span class='comment'># Build a convert url for the file
 </span>  <span class='id identifier rubyid_uri'>uri</span> <span class='op'>=</span> <span class='id identifier rubyid_file_uri'>file_uri</span><span class='lparen'>(</span><span class='id identifier rubyid_handle'>handle</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_uri'>uri</span><span class='period'>.</span><span class='id identifier rubyid_path'>path</span> <span class='op'>+=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>/convert</span><span class='tstring_end'>&quot;</span></span>
@@ -733,7 +737,7 @@ Conversion API</a>.</p>
 
   <span class='comment'># Add key, signature, and policy into the query string along
 </span>  <span class='comment'># with the convert options.
-</span>  <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_merge!'>merge!</span><span class='lparen'>(</span>
+</span>  <span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_merge'>merge</span><span class='lparen'>(</span>
     <span class='label'>key:</span> <span class='ivar'>@api_key</span><span class='comma'>,</span>
     <span class='label'>signature:</span> <span class='id identifier rubyid_signage'>signage</span><span class='lbracket'>[</span><span class='symbol'>:signature</span><span class='rbracket'>]</span><span class='comma'>,</span>
     <span class='label'>policy:</span> <span class='id identifier rubyid_signage'>signage</span><span class='lbracket'>[</span><span class='symbol'>:encoded_policy</span><span class='rbracket'>]</span><span class='comma'>,</span>
@@ -846,8 +850,6 @@ the URI (:expiry)</p>
       <pre class="lines">
 
 
-87
-88
 89
 90
 91
@@ -863,10 +865,12 @@ the URI (:expiry)</p>
 101
 102
 103
-104</pre>
+104
+105
+106</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/filepicker_client.rb', line 87</span>
+      <pre class="code"><span class="info file"># File 'lib/filepicker_client.rb', line 89</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_file_read_uri_and_expiry'>file_read_uri_and_expiry</span><span class='lparen'>(</span><span class='id identifier rubyid_handle'>handle</span><span class='comma'>,</span> <span class='id identifier rubyid_expiry'>expiry</span><span class='op'>=</span><span class='const'>DEFAULT_POLICY_EXPIRY</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_signage'>signage</span> <span class='op'>=</span> <span class='id identifier rubyid_sign'>sign</span><span class='lparen'>(</span>
@@ -881,10 +885,10 @@ the URI (:expiry)</p>
     <span class='label'>policy:</span> <span class='id identifier rubyid_signage'>signage</span><span class='lbracket'>[</span><span class='symbol'>:encoded_policy</span><span class='rbracket'>]</span>
   <span class='rparen'>)</span>
 
-  <span class='kw'>return</span> <span class='lbrace'>{</span>
+  <span class='kw'>return</span> <span class='id identifier rubyid_convert_hash'>convert_hash</span><span class='lparen'>(</span>
     <span class='label'>uri:</span> <span class='id identifier rubyid_uri'>uri</span><span class='comma'>,</span>
     <span class='label'>expiry:</span> <span class='id identifier rubyid_signage'>signage</span><span class='lbracket'>[</span><span class='symbol'>:policy</span><span class='rbracket'>]</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>expiry</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_to_i'>to_i</span>
-  <span class='rbrace'>}</span>
+  <span class='rparen'>)</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -955,12 +959,12 @@ the URI (:expiry)</p>
       <pre class="lines">
 
 
-78
-79
-80</pre>
+80
+81
+82</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/filepicker_client.rb', line 78</span>
+      <pre class="code"><span class="info file"># File 'lib/filepicker_client.rb', line 80</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_file_uri'>file_uri</span><span class='lparen'>(</span><span class='id identifier rubyid_handle'>handle</span><span class='rparen'>)</span>
   <span class='const'>URI</span><span class='period'>.</span><span class='id identifier rubyid_parse'>parse</span><span class='lparen'>(</span><span class='const'>FP_FILE_PATH</span> <span class='op'>+</span> <span class='id identifier rubyid_handle'>handle</span><span class='rparen'>)</span>
@@ -1034,21 +1038,21 @@ the URI (:expiry)</p>
       <pre class="lines">
 
 
-233
-234
-235
-236
-237
-238
-239
-240
-241
-242
-243
-244</pre>
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/filepicker_client.rb', line 233</span>
+      <pre class="code"><span class="info file"># File 'lib/filepicker_client.rb', line 273</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_read'>read</span><span class='lparen'>(</span><span class='id identifier rubyid_handle'>handle</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_uri'>uri</span> <span class='op'>=</span> <span class='id identifier rubyid_file_read_uri_and_expiry'>file_read_uri_and_expiry</span><span class='lparen'>(</span><span class='id identifier rubyid_handle'>handle</span><span class='rparen'>)</span><span class='lbracket'>[</span><span class='symbol'>:uri</span><span class='rbracket'>]</span>
@@ -1131,29 +1135,29 @@ the URI (:expiry)</p>
       <pre class="lines">
 
 
-299
-300
-301
-302
-303
-304
-305
-306
-307
-308
-309
-310
-311
-312
-313
-314
-315
-316
-317
-318</pre>
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/filepicker_client.rb', line 299</span>
+      <pre class="code"><span class="info file"># File 'lib/filepicker_client.rb', line 339</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_remove'>remove</span><span class='lparen'>(</span><span class='id identifier rubyid_handle'>handle</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_signage'>signage</span> <span class='op'>=</span> <span class='id identifier rubyid_sign'>sign</span><span class='lparen'>(</span><span class='label'>handle:</span> <span class='id identifier rubyid_handle'>handle</span><span class='comma'>,</span> <span class='label'>call:</span> <span class='symbol'>:remove</span><span class='rparen'>)</span>
@@ -1268,7 +1272,6 @@ Filepicker requests</p>
       <pre class="lines">
 
 
-36
 37
 38
 39
@@ -1305,12 +1308,15 @@ Filepicker requests</p>
 70
 71
 72
-73</pre>
+73
+74
+75</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/filepicker_client.rb', line 36</span>
+      <pre class="code"><span class="info file"># File 'lib/filepicker_client.rb', line 37</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_sign'>sign</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='op'>=</span><span class='lbrace'>{</span><span class='rbrace'>}</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='id identifier rubyid_convert_hash'>convert_hash</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:expiration_start</span><span class='rbracket'>]</span> <span class='op'>||=</span> <span class='const'>Time</span><span class='period'>.</span><span class='id identifier rubyid_now'>now</span>
   <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:expiry</span><span class='rbracket'>]</span> <span class='op'>||=</span> <span class='const'>DEFAULT_POLICY_EXPIRY</span>
 
@@ -1342,11 +1348,11 @@ Filepicker requests</p>
   <span class='comment'># Sign policy using our API secret
 </span>  <span class='id identifier rubyid_signature'>signature</span> <span class='op'>=</span> <span class='const'>OpenSSL</span><span class='op'>::</span><span class='const'>HMAC</span><span class='period'>.</span><span class='id identifier rubyid_hexdigest'>hexdigest</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>sha256</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='ivar'>@api_secret</span><span class='comma'>,</span> <span class='id identifier rubyid_encoded_policy'>encoded_policy</span><span class='rparen'>)</span>
 
-  <span class='kw'>return</span> <span class='lbrace'>{</span>
-    <span class='label'>policy:</span> <span class='id identifier rubyid_policy'>policy</span><span class='comma'>,</span>
+  <span class='kw'>return</span> <span class='id identifier rubyid_convert_hash'>convert_hash</span><span class='lparen'>(</span>
+    <span class='label'>policy:</span> <span class='id identifier rubyid_convert_hash'>convert_hash</span><span class='lparen'>(</span><span class='id identifier rubyid_policy'>policy</span><span class='rparen'>)</span><span class='comma'>,</span>
     <span class='label'>encoded_policy:</span> <span class='id identifier rubyid_encoded_policy'>encoded_policy</span><span class='comma'>,</span>
     <span class='label'>signature:</span> <span class='id identifier rubyid_signature'>signature</span>
-  <span class='rbrace'>}</span>
+  <span class='rparen'>)</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -1356,7 +1362,7 @@ Filepicker requests</p>
       <div class="method_details ">
   <h3 class="signature " id="stat-instance_method">
   
-    - (<tt>Hash</tt>) <strong>stat</strong>(handle) 
+    - (<tt>Hash</tt>) <strong>stat</strong>(handle, options = {}) 
   
 
   
@@ -1366,6 +1372,21 @@ Filepicker requests</p>
   <div class="discussion">
     
 <p>Get basic information about a file.</p>
+
+<p>Set any of the following keys to true in the options to enable certain
+fields in the data retrieved:
+* mimetype
+* uploaded
+* container
+*
+writeable
+* filename
+* location
+* key
+* path
+* size
+* width
+* height</p>
 
 
   </div>
@@ -1386,6 +1407,24 @@ Filepicker requests</p>
         &mdash;
         <div class='inline'>
 <p>Handle for the file in Filepicker</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>options</span>
+      
+      
+        <span class='type'>(<tt>Hash</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>{}</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'>
+<p>Options for generating the desired signature</p>
 </div>
       
     </li>
@@ -1417,38 +1456,80 @@ Filepicker requests</p>
       <pre class="lines">
 
 
-213
-214
-215
-216
-217
-218
-219
-220
-221
-222
-223
-224
-225
-226
-227
-228</pre>
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/filepicker_client.rb', line 213</span>
+      <pre class="code"><span class="info file"># File 'lib/filepicker_client.rb', line 232</span>
 
-<span class='kw'>def</span> <span class='id identifier rubyid_stat'>stat</span><span class='lparen'>(</span><span class='id identifier rubyid_handle'>handle</span><span class='rparen'>)</span>
-  <span class='id identifier rubyid_uri'>uri</span> <span class='op'>=</span> <span class='id identifier rubyid_file_read_uri_and_expiry'>file_read_uri_and_expiry</span><span class='lparen'>(</span><span class='id identifier rubyid_handle'>handle</span><span class='rparen'>)</span><span class='lbracket'>[</span><span class='symbol'>:uri</span><span class='rbracket'>]</span>
+<span class='kw'>def</span> <span class='id identifier rubyid_stat'>stat</span><span class='lparen'>(</span><span class='id identifier rubyid_handle'>handle</span><span class='comma'>,</span> <span class='id identifier rubyid_options'>options</span><span class='op'>=</span><span class='lbrace'>{</span><span class='rbrace'>}</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='id identifier rubyid_convert_hash'>convert_hash</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
+
+  <span class='comment'># Build a metadata url for the file
+</span>  <span class='comment'># (this call returns more information than a HEAD request against the resource)
+</span>  <span class='id identifier rubyid_uri'>uri</span> <span class='op'>=</span> <span class='id identifier rubyid_file_uri'>file_uri</span><span class='lparen'>(</span><span class='id identifier rubyid_handle'>handle</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_uri'>uri</span><span class='period'>.</span><span class='id identifier rubyid_path'>path</span> <span class='op'>+=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>/metadata</span><span class='tstring_end'>&quot;</span></span>
+
+  <span class='comment'># Sign to allow store of a new file under the target path.
+</span>  <span class='comment'># The handle of the file being read is not required.
+</span>  <span class='id identifier rubyid_signage'>signage</span> <span class='op'>=</span> <span class='id identifier rubyid_sign'>sign</span><span class='lparen'>(</span>
+    <span class='label'>expiry:</span> <span class='const'>DEFAULT_POLICY_EXPIRY</span><span class='comma'>,</span>
+    <span class='label'>call:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>stat</span><span class='tstring_end'>&#39;</span></span>
+  <span class='rparen'>)</span>
+
+  <span class='comment'># Add key, signature, and policy into the query string along
+</span>  <span class='comment'># with the metadata options.
+</span>  <span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_merge'>merge</span><span class='lparen'>(</span>
+    <span class='label'>key:</span> <span class='ivar'>@api_key</span><span class='comma'>,</span>
+    <span class='label'>signature:</span> <span class='id identifier rubyid_signage'>signage</span><span class='lbracket'>[</span><span class='symbol'>:signature</span><span class='rbracket'>]</span><span class='comma'>,</span>
+    <span class='label'>policy:</span> <span class='id identifier rubyid_signage'>signage</span><span class='lbracket'>[</span><span class='symbol'>:encoded_policy</span><span class='rbracket'>]</span>
+  <span class='rparen'>)</span>
+  <span class='id identifier rubyid_uri'>uri</span><span class='period'>.</span><span class='id identifier rubyid_query'>query</span> <span class='op'>=</span> <span class='const'>URI</span><span class='period'>.</span><span class='id identifier rubyid_encode_www_form'>encode_www_form</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
+
   <span class='id identifier rubyid_resource'>resource</span> <span class='op'>=</span> <span class='id identifier rubyid_get_fp_resource'>get_fp_resource</span> <span class='id identifier rubyid_uri'>uri</span>
 
-  <span class='id identifier rubyid_response'>response</span> <span class='op'>=</span> <span class='id identifier rubyid_resource'>resource</span><span class='period'>.</span><span class='id identifier rubyid_head'>head</span>
+  <span class='id identifier rubyid_response'>response</span> <span class='op'>=</span> <span class='id identifier rubyid_resource'>resource</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span>
 
   <span class='kw'>if</span> <span class='id identifier rubyid_response'>response</span><span class='period'>.</span><span class='id identifier rubyid_code'>code</span> <span class='op'>==</span> <span class='int'>200</span>
-    <span class='kw'>return</span> <span class='lbrace'>{</span>
-      <span class='label'>name:</span> <span class='id identifier rubyid_response'>response</span><span class='period'>.</span><span class='id identifier rubyid_headers'>headers</span><span class='lbracket'>[</span><span class='symbol'>:x_file_name</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='comma'>,</span>
-      <span class='label'>size:</span> <span class='id identifier rubyid_response'>response</span><span class='period'>.</span><span class='id identifier rubyid_headers'>headers</span><span class='lbracket'>[</span><span class='symbol'>:content_length</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_to_i'>to_i</span><span class='comma'>,</span>
-      <span class='label'>mime_type:</span> <span class='id identifier rubyid_response'>response</span><span class='period'>.</span><span class='id identifier rubyid_headers'>headers</span><span class='lbracket'>[</span><span class='symbol'>:content_type</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span>
-    <span class='rbrace'>}</span>
+    <span class='id identifier rubyid_response_data'>response_data</span> <span class='op'>=</span> <span class='const'>JSON</span><span class='period'>.</span><span class='id identifier rubyid_parse'>parse</span><span class='lparen'>(</span><span class='id identifier rubyid_response'>response</span><span class='period'>.</span><span class='id identifier rubyid_body'>body</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_stats'>stats</span> <span class='op'>=</span> <span class='id identifier rubyid_convert_hash'>convert_hash</span><span class='lparen'>(</span><span class='id identifier rubyid_response_data'>response_data</span><span class='rparen'>)</span>
+
+    <span class='kw'>return</span> <span class='id identifier rubyid_stats'>stats</span>
   <span class='kw'>else</span>
     <span class='id identifier rubyid_raise'>raise</span> <span class='const'>FilepickerClientError</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>failed to get file stats (code: </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_response'>response</span><span class='period'>.</span><span class='id identifier rubyid_code'>code</span><span class='embexpr_end'>}</span><span class='tstring_content'>)</span><span class='tstring_end'>&quot;</span></span>
   <span class='kw'>end</span>
@@ -1540,8 +1621,6 @@ Filepicker requests</p>
       <pre class="lines">
 
 
-110
-111
 112
 113
 114
@@ -1563,10 +1642,12 @@ Filepicker requests</p>
 130
 131
 132
-133</pre>
+133
+134
+135</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/filepicker_client.rb', line 110</span>
+      <pre class="code"><span class="info file"># File 'lib/filepicker_client.rb', line 112</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_store'>store</span><span class='lparen'>(</span><span class='id identifier rubyid_file'>file</span><span class='comma'>,</span> <span class='id identifier rubyid_path'>path</span><span class='op'>=</span><span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_signage'>signage</span> <span class='op'>=</span> <span class='id identifier rubyid_sign'>sign</span><span class='lparen'>(</span><span class='label'>path:</span> <span class='id identifier rubyid_path'>path</span><span class='comma'>,</span> <span class='label'>call:</span> <span class='symbol'>:store</span><span class='rparen'>)</span>
@@ -1585,7 +1666,7 @@ Filepicker requests</p>
 
   <span class='kw'>if</span> <span class='id identifier rubyid_response'>response</span><span class='period'>.</span><span class='id identifier rubyid_code'>code</span> <span class='op'>==</span> <span class='int'>200</span>
     <span class='id identifier rubyid_response_data'>response_data</span> <span class='op'>=</span> <span class='const'>JSON</span><span class='period'>.</span><span class='id identifier rubyid_parse'>parse</span> <span class='id identifier rubyid_response'>response</span><span class='period'>.</span><span class='id identifier rubyid_body'>body</span>
-    <span class='id identifier rubyid_file'>file</span> <span class='op'>=</span> <span class='const'>FilepickerClientFile</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span> <span class='id identifier rubyid_response_data'>response_data</span><span class='comma'>,</span> <span class='kw'>self</span>
+    <span class='id identifier rubyid_file'>file</span> <span class='op'>=</span> <span class='const'>FilepickerClientFile</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_response_data'>response_data</span><span class='comma'>,</span> <span class='kw'>self</span><span class='rparen'>)</span>
 
     <span class='kw'>return</span> <span class='id identifier rubyid_file'>file</span>
   <span class='kw'>else</span>
@@ -1680,8 +1761,6 @@ through Filepicker.</p>
       <pre class="lines">
 
 
-139
-140
 141
 142
 143
@@ -1703,10 +1782,12 @@ through Filepicker.</p>
 159
 160
 161
-162</pre>
+162
+163
+164</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/filepicker_client.rb', line 139</span>
+      <pre class="code"><span class="info file"># File 'lib/filepicker_client.rb', line 141</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_store_url'>store_url</span><span class='lparen'>(</span><span class='id identifier rubyid_file_url'>file_url</span><span class='comma'>,</span> <span class='id identifier rubyid_path'>path</span><span class='op'>=</span><span class='kw'>nil</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_signage'>signage</span> <span class='op'>=</span> <span class='id identifier rubyid_sign'>sign</span><span class='lparen'>(</span><span class='label'>path:</span> <span class='id identifier rubyid_path'>path</span><span class='comma'>,</span> <span class='label'>call:</span> <span class='symbol'>:store</span><span class='rparen'>)</span>
@@ -1817,29 +1898,29 @@ through Filepicker.</p>
       <pre class="lines">
 
 
-250
-251
-252
-253
-254
-255
-256
-257
-258
-259
-260
-261
-262
-263
-264
-265
-266
-267
-268
-269</pre>
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/filepicker_client.rb', line 250</span>
+      <pre class="code"><span class="info file"># File 'lib/filepicker_client.rb', line 290</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_write'>write</span><span class='lparen'>(</span><span class='id identifier rubyid_handle'>handle</span><span class='comma'>,</span> <span class='id identifier rubyid_file'>file</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_signage'>signage</span> <span class='op'>=</span> <span class='id identifier rubyid_sign'>sign</span><span class='lparen'>(</span><span class='label'>handle:</span> <span class='id identifier rubyid_handle'>handle</span><span class='comma'>,</span> <span class='label'>call:</span> <span class='symbol'>:write</span><span class='rparen'>)</span>
@@ -1947,29 +2028,29 @@ URL.</p>
       <pre class="lines">
 
 
-275
-276
-277
-278
-279
-280
-281
-282
-283
-284
-285
-286
-287
-288
-289
-290
-291
-292
-293
-294</pre>
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/filepicker_client.rb', line 275</span>
+      <pre class="code"><span class="info file"># File 'lib/filepicker_client.rb', line 315</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_write_url'>write_url</span><span class='lparen'>(</span><span class='id identifier rubyid_handle'>handle</span><span class='comma'>,</span> <span class='id identifier rubyid_file_url'>file_url</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_signage'>signage</span> <span class='op'>=</span> <span class='id identifier rubyid_sign'>sign</span><span class='lparen'>(</span><span class='label'>handle:</span> <span class='id identifier rubyid_handle'>handle</span><span class='comma'>,</span> <span class='label'>call:</span> <span class='symbol'>:writeUrl</span><span class='rparen'>)</span>
@@ -2001,7 +2082,7 @@ URL.</p>
 </div>
 
     <div id="footer">
-  Generated on Thu Nov  7 11:11:52 2013 by
+  Generated on Fri Jan  3 10:53:20 2014 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.8.7 (ruby-2.0.0).
 </div>

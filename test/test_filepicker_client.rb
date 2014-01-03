@@ -57,7 +57,7 @@ class TestFilepickerClient < Test::Unit::TestCase
       # stat
       stats = file.stat
       assert_equal content.length, stats[:size]
-      assert_equal 'text/plain; charset=utf-8', stats[:mime_type]
+      assert_equal 'text/plain', stats[:mimetype]
 
       # read
       downloaded_content = file.read
