@@ -142,12 +142,13 @@ class FilepickerClient
     signage = sign(path: path, call: :store)
 
     uri = URI.parse(FP_API_PATH)
-    uri.query = URI.encode_www_form(
+    query_params = {
       key: @api_key,
       signature: signage[:signature],
-      policy: signage[:encoded_policy],
-      path: signage[:policy]['path']
-    )
+      policy: signage[:encoded_policy]
+    }
+    query_params[:path] = signage[:policy]['path'] if path
+    uri.query = URI.encode_www_form(query_params)
 
     resource = get_fp_resource uri
 
