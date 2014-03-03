@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = "filepicker_client"
-  s.version     = "1.0.0"
+  s.version     = "1.0.1"
   s.date        = "2013-07-25"
   s.summary     = "Filepicker.io Client"
   s.description = "A simple library for interfacing with the Filepicker.io REST API"
