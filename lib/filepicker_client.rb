@@ -108,8 +108,9 @@ class FilepickerClient
   # Store the given file at the given storage path through Filepicker.
   # @param path [String] Path the file should be organized under in the destination storage
   # @param file [File] File to upload
+  # @param options [Hash] optional additional filepicker.io request params
   # @return [FilepickerClientFile] Object representing the uploaded file in Filepicker
-  def store(file, path=nil)
+  def store(file, path=nil, options = {})
     signage = sign(path: path, call: :store)
 
     uri = URI.parse(FP_API_PATH)
@@ -118,6 +119,9 @@ class FilepickerClient
       signature: signage[:signature],
       policy: signage[:encoded_policy]
     }
+
+    query_params = query_params.merge(options)
+
     query_params[:path] = signage[:policy]['path'] if path
     uri.query = encode_uri_query(query_params)
     resource = get_fp_resource uri
