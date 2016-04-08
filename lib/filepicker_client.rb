@@ -47,7 +47,7 @@ class FilepickerClient
     if options[:handle]
       policy['handle'] = options[:handle]
     elsif options[:path]
-      policy['path'] = (options[:path] + '/').gsub /\/+/, '/' # ensure path has a single, trailing '/'
+      policy['path'] = (options[:path] + '/').gsub(/\/+/, '/') # ensure path has a single, trailing '/'
     end
 
     if options[:min_size]
@@ -361,7 +361,7 @@ class FilepickerClient
   private
 
   def get_fp_resource(uri)
-    resource = RestClient::Resource.new(
+    RestClient::Resource.new(
       uri.to_s,
       verify_ssl: (@filepicker_cert ? OpenSSL::SSL::VERIFY_PEER : OpenSSL::SSL::VERIFY_NONE),
       ssl_client_cert: @filepicker_cert

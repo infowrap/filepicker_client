@@ -1,8 +1,8 @@
-require 'test/unit'
+require 'minitest/autorun'
 require 'tempfile'
 require 'filepicker_client'
 
-class TestFilepickerClient < Test::Unit::TestCase
+class TestFilepickerClient < Minitest::Test
   def setup
     @api_key = ENV['FPAPIKEY']
     @api_secret = ENV['FPAPISECRET']
@@ -16,7 +16,7 @@ class TestFilepickerClient < Test::Unit::TestCase
 
   def test_client_file_client_required
     begin
-      client_file = FilepickerClientFile.new({}, nil)
+      FilepickerClientFile.new({}, nil)
     rescue FilepickerClientError => e
       assert_equal "FilepickerClientFile client required", e.message
       error_fired = true
@@ -48,7 +48,7 @@ class TestFilepickerClient < Test::Unit::TestCase
       file = client.store(store_file, 'test')
 
       # file attributes
-      assert_match /^test\.txt/, file.filename
+      assert_match(/^test\.txt/, file.filename)
 
       #file_uri
       file_uri = file.file_uri
@@ -65,7 +65,7 @@ class TestFilepickerClient < Test::Unit::TestCase
 
       # store_url
       second_file = client.store_url file.file_read_uri_and_expiry[:uri], 'test'
-      assert_not_equal second_file.handle, file.handle
+      assert(second_file.handle != file.handle)
       assert_equal second_file.read, content
 
       # write
