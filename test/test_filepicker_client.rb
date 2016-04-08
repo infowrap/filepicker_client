@@ -1,8 +1,8 @@
-require 'test/unit'
+require 'minitest/autorun'
 require 'tempfile'
 require 'filepicker_client'
 
-class TestFilepickerClient < Test::Unit::TestCase
+class TestFilepickerClient < Minitest::Test
   def setup
     @api_key = ENV['FPAPIKEY']
     @api_secret = ENV['FPAPISECRET']
@@ -65,7 +65,7 @@ class TestFilepickerClient < Test::Unit::TestCase
 
       # store_url
       second_file = client.store_url file.file_read_uri_and_expiry[:uri], 'test'
-      assert_not_equal second_file.handle, file.handle
+      refute_equal second_file.handle, file.handle
       assert_equal second_file.read, content
 
       # write
