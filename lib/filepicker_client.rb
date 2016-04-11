@@ -47,7 +47,7 @@ class FilepickerClient
     if options[:handle]
       policy['handle'] = options[:handle]
     elsif options[:path]
-      policy['path'] = (options[:path] + '/').gsub /\/+/, '/' # ensure path has a single, trailing '/'
+      policy['path'] = (options[:path] + '/').gsub(/\/+/, '/') # ensure path has a single, trailing '/'
     end
 
     if options[:min_size]
@@ -108,8 +108,9 @@ class FilepickerClient
   # Store the given file at the given storage path through Filepicker.
   # @param path [String] Path the file should be organized under in the destination storage
   # @param file [File] File to upload
+  # @param options [Hash] optional additional filepicker.io request params
   # @return [FilepickerClientFile] Object representing the uploaded file in Filepicker
-  def store(file, path=nil)
+  def store(file, path=nil, options = {})
     signage = sign(path: path, call: :store)
 
     uri = URI.parse(FP_API_PATH)
@@ -118,6 +119,9 @@ class FilepickerClient
       signature: signage[:signature],
       policy: signage[:encoded_policy]
     }
+
+    query_params = query_params.merge(options)
+
     query_params[:path] = signage[:policy]['path'] if path
     uri.query = encode_uri_query(query_params)
     resource = get_fp_resource uri
@@ -379,7 +383,7 @@ class FilepickerClient
   private
 
   def get_fp_resource(uri)
-    resource = RestClient::Resource.new(
+    RestClient::Resource.new(
       uri.to_s,
       verify_ssl: (@filepicker_cert ? OpenSSL::SSL::VERIFY_PEER : OpenSSL::SSL::VERIFY_NONE),
       ssl_client_cert: @filepicker_cert
