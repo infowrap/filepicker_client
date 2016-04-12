@@ -106,8 +106,8 @@ class FilepickerClient
   end
 
   # Store the given file at the given storage path through Filepicker.
-  # @param path [String] Path the file should be organized under in the destination storage
   # @param file [File] File to upload
+  # @param path [String] Path the file should be organized under in the destination storage
   # @param options [Hash] optional additional filepicker.io request params
   # @return [FilepickerClientFile] Object representing the uploaded file in Filepicker
   def store(file, path=nil, options = {})
@@ -135,6 +135,26 @@ class FilepickerClient
       return file
     else
       raise FilepickerClientError, "failed to store (code: #{response.code})"
+    end
+  end
+
+  # Store provided string in a file with the provided file name under the target storage path through Filepicker.
+  # @param content [String] Contents of the file which should created in in the destination storage
+  # @param file_name [String] Name that should be given to the file in Filepicker
+  # @param path [String] Path the file should be organized under in the destination storage
+  # @param options [Hash] optional additional filepicker.io request params
+  # @return [FilepickerClientFile] Object representing the uploaded file in Filepicker
+  def store_content(content, file_name, path=nil, options = {})
+    store_file = Tempfile.new(file_name)
+
+    begin
+      store_file.write content
+      store_file.rewind
+
+      return store(store_file, path, options)
+    ensure
+      store_file.close
+      store_file.unlink
     end
   end
 

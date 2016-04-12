@@ -25,6 +25,78 @@ class TestFilepickerClient < Minitest::Test
     assert error_fired, "FilepickerClientFile did not require a client as it should"
   end
 
+  def test_store_string_text_file
+    assert @api_key, "Must set FPAPIKEY for this test"
+    assert @api_secret, "Must set FPAPISECRET for this test"
+
+    client = FilepickerClient.new @api_key, @api_secret
+    content = "test file content\n" * 10
+
+    begin
+      # store
+      file = client.store_content(content, 'filename.txt', 'test')
+
+      # file attributes
+      assert_match(/^filename\.txt/, file.filename)
+
+      #file_uri
+      file_uri = file.file_uri
+      assert_equal "https://www.filepicker.io/api/file/#{file.handle}", file_uri.to_s
+
+      # stat
+      stats = file.stat
+      assert_equal content.length, stats[:size]
+      assert_equal 'text/plain', stats[:mimetype]
+
+      # read
+      downloaded_content = file.read
+      assert_equal content, downloaded_content
+
+      #remove test file
+      assert file.remove
+    rescue Exception => e
+      raise e # reraise to have error reported
+    end
+  end
+
+  def test_store_string_image_file
+    assert @api_key, "Must set FPAPIKEY for this test"
+    assert @api_secret, "Must set FPAPISECRET for this test"
+
+    client = FilepickerClient.new @api_key, @api_secret
+
+    image_file = File.open('test/image.jpeg')
+    content = image_file.read
+
+    begin
+      # store
+      file = client.store_content(content, 'filename.jpeg', 'test')
+
+      # file attributes
+      assert_match(/^filename\.jpeg/, file.filename)
+
+      #file_uri
+      file_uri = file.file_uri
+      assert_equal "https://www.filepicker.io/api/file/#{file.handle}", file_uri.to_s
+
+      # stat
+      stats = file.stat
+      assert_equal image_file.size, stats[:size]
+      assert_equal 'text/plain', stats[:mimetype]
+
+      # read
+      downloaded_content = file.read
+      assert_equal content, downloaded_content
+
+      #remove test file
+      assert file.remove
+    rescue Exception => e
+      raise e # reraise to have error reported
+    end
+  end
+
+
+
   def test_file
     assert @api_key, "Must set FPAPIKEY for this test"
     assert @api_secret, "Must set FPAPISECRET for this test"
