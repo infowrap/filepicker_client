@@ -101,7 +101,9 @@ class FilepickerClient
 
     return convert_hash(
       uri: uri,
-      expiry: signage[:policy]['expiry'].to_i
+      expiry: signage[:policy]['expiry'].to_i,
+      signature: signage[:signature],
+      policy: signage[:encoded_policy]
     )
   end
 
